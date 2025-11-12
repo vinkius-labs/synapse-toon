@@ -1,6 +1,3 @@
-docker compose build
-docker compose run --rm app bash -lc \
-docker compose run --rm app bash
 # Synapse TOON
 
 Synapse TOON is a Laravel-native engine for extreme API payload optimization and LLM cost reduction. It transforms verbose JSON into ultra-dense representations, trimming token consumption by 25–45% while preserving full semantic fidelity—so you ship faster APIs and pay dramatically less for inference.
