@@ -1,0 +1,52 @@
+{
+    "name": "vinkius-labs/synapse-toon",
+    "description": "Synapse TOON - high-performance API payload optimization and streaming toolkit for Laravel 11/12",
+    "keywords": ["laravel", "optimization", "apis", "streaming", "llm", "compression"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Renato Marinho",
+            "email": "renato.marinho@gitscrum.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2 || ^8.3",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "orchestra/testbench": "^10.6.0",
+        "squizlabs/php_codesniffer": "^3.6",
+        "mockery/mockery": "^1.6",
+        "laravel/pint": "^1.25"
+    },
+    "autoload": {
+        "psr-4": {
+            "VinkiusLabs\\SynapseToon\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "VinkiusLabs\\SynapseToon\\Test\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+        "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+        "docker:build": "docker-compose build",
+        "docker:test": "docker-compose run --rm app bash -lc \"composer install --no-interaction --prefer-dist && vendor/bin/phpunit --configuration phpunit.xml\""
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VinkiusLabs\\SynapseToon\\SynapseToonServiceProvider"
+            ],
+            "aliases": {
+                "SynapseToon": "VinkiusLabs\\SynapseToon\\Facades\\SynapseToon"
+            }
+        }
+    }
+}

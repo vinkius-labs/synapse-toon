@@ -1,0 +1,7 @@
+vendor
+.git
+.github
+node_modules
+composer-cache
+build
+dist

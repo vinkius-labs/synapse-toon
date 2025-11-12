@@ -1,0 +1,21 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: synapse-toon/app:latest
+    container_name: synapse-toon-app
+    working_dir: /workspace
+    environment:
+      COMPOSER_MEMORY_LIMIT: "-1"
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
+    volumes:
+      - ./:/workspace:cached
+      - composer-cache:/tmp/composer-cache
+    tty: true
+    stdin_open: true
+    command: ["sleep", "infinity"]
+
+volumes:
+  composer-cache:
