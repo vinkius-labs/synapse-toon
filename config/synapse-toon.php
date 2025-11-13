@@ -68,7 +68,22 @@ return [
         ],
         'context' => [
             'limit' => 3,
+            // Number of results to request from vector store (pre-selection)
+            'search_limit' => 10,
+            // Total token budget for the query + documents
+            'max_tokens' => 512,
+            // Minimum score to include a document
+            'min_score' => 0.0,
+            // Fallback character limit when summarizer is not available
             'max_snippet_length' => 200,
+            // TTL (seconds) for caching rag queries. 0 disables caching.
+            'cache_ttl' => 0,
+            // Whether to attempt summarization (true) or simple truncation (false).
+            'summarize' => false,
+            // Container binding or callable used to summarize/shorten a document payload.
+            'summarizer_service' => null,
+            // Optional metadata filters applied to documents returned by the driver.
+            'metadata_filters' => [],
         ],
     ],
 
