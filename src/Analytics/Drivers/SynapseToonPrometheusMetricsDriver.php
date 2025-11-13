@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VinkiusLabs\SynapseToon\Analytics\Drivers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use VinkiusLabs\SynapseToon\Contracts\SynapseToonMetricsDriver;
 
 class SynapseToonPrometheusMetricsDriver implements SynapseToonMetricsDriver
@@ -38,19 +39,15 @@ class SynapseToonPrometheusMetricsDriver implements SynapseToonMetricsDriver
 
     protected function sanitize(string $key): string
     {
-        return preg_replace('/[^a-zA-Z0-9:_]/', '_', strtolower($key)) ?? $key;
+        return preg_replace('/[^a-zA-Z0-9:_]/', '_', Str::lower($key)) ?? $key;
     }
 
     protected function normalizeValue(mixed $value): string
     {
-        if (is_bool($value)) {
-            return $value ? '1' : '0';
-        }
-
-        if (is_numeric($value)) {
-            return (string) $value;
-        }
-
-        return '"' . addslashes((string) $value) . '"';
+        return match (true) {
+            is_bool($value) => $value ? '1' : '0',
+            is_numeric($value) => (string) $value,
+            default => '"' . addslashes((string) $value) . '"',
+        };
     }
 }

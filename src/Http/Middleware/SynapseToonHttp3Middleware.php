@@ -7,6 +7,7 @@ namespace VinkiusLabs\SynapseToon\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use VinkiusLabs\SynapseToon\Compression\SynapseToonCompressor;
@@ -73,20 +74,20 @@ class SynapseToonHttp3Middleware
 
     private function isHttp3(Request $request): bool
     {
-        return str_contains(strtolower((string) $request->server('SERVER_PROTOCOL')), 'http/3')
+        return Str::contains(Str::lower((string) $request->server('SERVER_PROTOCOL')), 'http/3')
             || $this->hasHttp3AltSvc($request)
             || $this->hasHttp3Capability($request);
     }
 
     private function hasHttp3AltSvc(Request $request): bool
     {
-        $altSvc = strtolower((string) ($request->server('HTTP_ALT_SVC') ?? $request->header('Alt-Svc')));
+        $altSvc = Str::lower((string) ($request->server('HTTP_ALT_SVC') ?? $request->header('Alt-Svc')));
         
-        return $altSvc !== '' && str_contains($altSvc, 'h3');
+        return $altSvc !== '' && Str::contains($altSvc, 'h3');
     }
 
     private function hasHttp3Capability(Request $request): bool
     {
-        return str_contains(strtolower((string) $request->header('Sec-CH-UA')), 'h3');
+        return Str::contains(Str::lower((string) $request->header('Sec-CH-UA')), 'h3');
     }
 }

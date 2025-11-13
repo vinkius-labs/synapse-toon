@@ -96,7 +96,7 @@ class SynapseToonServiceProvider extends BaseServiceProvider
         if (! Request::hasMacro('wantsToon')) {
             Request::macro('wantsToon', function (): bool {
                 /** @var Request $this */
-                return str_contains($this->header('Accept', ''), 'application/x-synapse-toon')
+                return \Illuminate\Support\Str::contains($this->header('Accept', ''), 'application/x-synapse-toon')
                     || $this->boolean('synapse_toon');
             });
         }

@@ -38,14 +38,10 @@ class SynapseToonDatadogMetricsDriver implements SynapseToonMetricsDriver
 
     protected function buildTags(array $payload): array
     {
-        $tags = [];
-
-        foreach ($payload as $key => $value) {
-            if (is_scalar($value)) {
-                $tags[] = sprintf('%s:%s', $key, $value);
-            }
-        }
-
-        return $tags;
+        return collect($payload)
+            ->filter(fn ($value) => is_scalar($value))
+            ->map(fn ($value, $key) => sprintf('%s:%s', $key, $value))
+            ->values()
+            ->all();
     }
 }

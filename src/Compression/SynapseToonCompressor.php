@@ -28,15 +28,11 @@ class SynapseToonCompressor
         $resolved = collect($this->resolveAlgorithms($acceptEncoding));
         $preferredAlgorithm = $this->config->get('synapse-toon.compression.prefer', 'brotli');
 
-        if ($resolved->isEmpty()) {
-            if ($acceptEncoding === null || trim($acceptEncoding) === '') {
-                $resolved = $resolved->prepend($preferredAlgorithm);
-            }
-        } else {
-            if ($preferredAlgorithm) {
-                $resolved = $resolved->prepend($preferredAlgorithm);
-            }
-        }
+        match (true) {
+            $resolved->isEmpty() && (is_null($acceptEncoding) || trim($acceptEncoding) === '') && $preferredAlgorithm => $resolved = $resolved->prepend($preferredAlgorithm),
+            !$resolved->isEmpty() && $preferredAlgorithm => $resolved = $resolved->prepend($preferredAlgorithm),
+            default => null,
+        };
 
         $preferred = $resolved
             ->unique()
@@ -59,13 +55,13 @@ class SynapseToonCompressor
             return null;
         }
 
-        $modeValue = match (is_string($mode) ? strtolower($mode) : $mode) {
+        $modeValue = match (is_string($mode) ? Str::lower($mode) : $mode) {
             'text', 'html' => defined('BROTLI_MODE_TEXT') ? constant('BROTLI_MODE_TEXT') : 1,
             'font' => defined('BROTLI_MODE_FONT') ? constant('BROTLI_MODE_FONT') : 2,
             default => defined('BROTLI_MODE_GENERIC') ? constant('BROTLI_MODE_GENERIC') : 0,
         };
 
-        $result = \call_user_func('brotli_compress', $payload, (int) $quality, $modeValue);
+        $result = \brotli_compress($payload, (int) $quality, $modeValue);
 
         return $result === false ? null : $result;
     }
@@ -137,11 +133,9 @@ class SynapseToonCompressor
             return null;
         }
 
-        try {
-            $body = $this->{$method}($payload, $options);
-        } catch (\Throwable) {
-            return null;
-        }
+        $body = rescue(function () use ($method, $payload, $options) {
+            return $this->{$method}($payload, $options);
+        }, null);
 
         if ($body === null) {
             return null;

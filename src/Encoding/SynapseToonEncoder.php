@@ -79,7 +79,7 @@ class SynapseToonEncoder
     {
         $normalized = $this->normalize($payload);
         $json = json_encode($normalized) ?: '';
-        $length = max(strlen($json), 1);
+        $length = max(Str::length($json), 1);
         $depthWeight = $this->depth($normalized) / 10;
         $arrayWeight = $this->countNumericArrays($normalized) / 20;
 
@@ -95,7 +95,7 @@ class SynapseToonEncoder
             $content = json_encode($normalized) ?: '';
         }
 
-        return (int) ceil(strlen($content) / 4); // Approximate 1 token ~ 4 chars
+        return (int) ceil(Str::length($content) / 4); // Approximate 1 token ~ 4 chars
     }
 
     /**

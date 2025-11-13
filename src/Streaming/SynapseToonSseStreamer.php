@@ -62,9 +62,12 @@ class SynapseToonSseStreamer
 
     private function flushBuffers(): void
     {
-        if (function_exists('ob_flush')) {
-            @ob_flush();
-        }
+        rescue(function () {
+            if (function_exists('ob_flush')) {
+                @ob_flush();
+            }
+        }, null);
+
         flush();
     }
 }

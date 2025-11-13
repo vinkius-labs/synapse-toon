@@ -6,13 +6,24 @@ Semantic search with vector databases.
 
 ### Abstraction Layer
 
+The package exposes a lightweight `SynapseToonVectorStore` contract that focuses on read (search) operations. For drivers that support index management, an optional `SynapseToonVectorStoreManager` contract is available with `store` and `delete` operations.
+
 ```php
 namespace VinkiusLabs\SynapseToon\Contracts;
 
-interface VectorStore
+interface SynapseToonVectorStore
 {
-    public function search(string $query, int $limit = 3): array;
-    public function store(string $id, array $vector, array $metadata): void;
+    /**
+     * Retrieve the most relevant documents for a query.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function search(string $query, int $limit = 3): Collection;
+}
+
+interface SynapseToonVectorStoreManager
+{
+    public function store(string $id, string $content, array $metadata = []): void;
     public function delete(string $id): void;
 }
 ```
@@ -116,6 +127,58 @@ class SupabaseVectorStore implements VectorStore
 }
 ```
 
+### In-Memory Vector Store (Dev & Tests)
+
+```php
+namespace VinkiusLabs\SynapseToon\Rag\Drivers;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStore;
+
+class InMemoryVectorStore implements SynapseToonVectorStore
+{
+    protected array $index = [];
+
+    public function __construct(array $seed = [])
+    {
+        foreach ($seed as $item) {
+            $id = $item['id'] ?? (string) Str::uuid();
+            $this->index[$id] = [
+                'id' => $id,
+                'content' => $item['content'] ?? '',
+                'metadata' => $item['metadata'] ?? [],
+                'score' => $item['score'] ?? 1.0,
+            ];
+        }
+    }
+
+    public function search(string $query, int $limit = 3): Collection
+    {
+        $query = trim($query);
+
+        $items = Collection::make($this->index)
+            ->map(function ($item) use ($query) {
+                $score = $item['score'] ?? 0.0;
+                if ($query !== '' && str_contains(strtolower($item['content']), strtolower($query))) {
+                    $score += 0.5;
+                }
+
+                return [
+                    'id' => $item['id'],
+                    'content' => $item['content'],
+                    'metadata' => $item['metadata'] ?? [],
+                    'score' => $score,
+                ];
+            })
+            ->sortByDesc('score')
+            ->values();
+
+        return $items->take($limit);
+    }
+}
+```
+
 ## RAG Context Building
 
 ### Hybrid Search
@@ -128,9 +191,9 @@ class RagService
         private readonly DatabaseRepository $db,
     ) {}
     
-    public function buildContext(string $query, int $limit = 5): string
+    public function buildContext(string $query, array $metadata = []): string
     {
-        // Vector search for semantic similarity
+        // Vector search for semantic similarity (pre-select across 'search_limit' then score+token-budget selection)
         $vectorResults = $this->vectorStore->search($query, $limit);
         
         // Keyword search for exact matches
@@ -140,6 +203,8 @@ class RagService
         $combined = $this->mergeResults($vectorResults, $keywordResults);
         
         // Build context string
+        // Build a compact context suitable for LLM injection (the actual service chooses
+        // document chunks by score and token budget before returning the final encoded context)
         return implode(PHP_EOL . PHP_EOL, array_map(
             fn($doc) => $doc['content'],
             array_slice($combined, 0, $limit)
@@ -164,6 +229,43 @@ class RagService
     }
 }
 ```
+
+## Configuration
+
+Add the following to your `synapse-toon.php` configuration under the `rag.context` key to fine-tune budget and selection:
+
+```php
+'context' => [
+    'limit' => 3,                    // how many documents to include in final context
+    'search_limit' => 10,            // how many results to prefetch from the vector store
+    'max_tokens' => 512,             // total token budget (query + documents)
+    'min_score' => 0.0,              // minimum relevance score to include a doc
+    'max_snippet_length' => 200,     // fallback snippet length in chars
+    'cache_ttl' => 0,                // seconds: 0 disables cache
+    'summarize' => false,            // whether to use a summarizer service when docs are too large
+    'summarizer_service' => null,    // container binding for summarizer service (callable or object with summarize())
+    'metadata_filters' => [],        // optional metadata filters applied to the search results
+],
+```
+
+## Summarizer Example
+
+If you'd like to use an on-demand summarizer to compact large documents into the token budget, bind a summarizer service into the container:
+
+```php
+$this->app->bind('synapse-toon.summarizer', function () {
+    return function (string $content, int $targetTokens = 0): string {
+        // This naive summarizer attempts to shrink content by characters
+        $maxChars = max(0, $targetTokens * 4);
+        return \Illuminate\Support\Str::substr($content, 0, $maxChars);
+    };
+});
+
+$this->app['config']->set('synapse-toon.rag.context.summarize', true);
+$this->app['config']->set('synapse-toon.rag.context.summarizer_service', 'synapse-toon.summarizer');
+```
+
+The summarizer should aim to respect the `targetTokens` hint and return a compacted, semantically-representative string that fits into the token budget.
 
 ## Embedding Models
 

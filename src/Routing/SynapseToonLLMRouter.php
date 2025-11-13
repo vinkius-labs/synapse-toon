@@ -34,13 +34,9 @@ class SynapseToonLLMRouter
         $complexity = $context['complexity'] ?? $this->encoder->complexityScore($payload);
         $tokens = $context['tokens'] ?? $this->encoder->estimatedTokens($payload);
 
-        foreach ($this->strategies as $strategy) {
-            if ($this->matchesStrategy($complexity, $tokens, $strategy)) {
-                return $strategy['target'] ?? $this->getDefaultTarget();
-            }
-        }
+        $matched = collect($this->strategies)->first(fn ($strategy) => $this->matchesStrategy($complexity, $tokens, $strategy));
 
-        return $this->getDefaultTarget();
+        return $matched['target'] ?? $this->getDefaultTarget();
     }
 
     /**
@@ -61,17 +57,13 @@ class SynapseToonLLMRouter
 
     private function resolveClient(string $target, ?string $connection): SynapseToonLLMClient
     {
-        if ($connection !== null) {
-            return $this->container->bound($connection)
-                ? $this->container->make($connection)
-                : new SynapseToonNullLLMClient();
-        }
-
         $clientKey = "synapse-toon.router.clients.{$target}";
 
-        return $this->container->bound($clientKey)
-            ? $this->container->make($clientKey)
-            : new SynapseToonNullLLMClient();
+        return match (true) {
+            $connection !== null && $this->container->bound($connection) => $this->container->make($connection),
+            $this->container->bound($clientKey) => $this->container->make($clientKey),
+            default => new SynapseToonNullLLMClient(),
+        };
     }
 
     private function matchesStrategy(float|int $complexity, int $tokens, array $strategy): bool
