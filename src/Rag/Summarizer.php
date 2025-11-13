@@ -6,7 +6,7 @@ namespace VinkiusLabs\SynapseToon\Rag;
 
 use Illuminate\Contracts\Container\Container;
 
-final class Summarizer
+class Summarizer
 {
     public function __construct(private Container $container)
     {

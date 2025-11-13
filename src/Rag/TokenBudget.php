@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace VinkiusLabs\SynapseToon\Rag;
 
-final class TokenBudget
+class TokenBudget
 {
     private int $maxTokens;
     private int $usedTokens;

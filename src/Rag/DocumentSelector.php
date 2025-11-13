@@ -11,7 +11,7 @@ use VinkiusLabs\SynapseToon\Rag\TokenBudget;
 use VinkiusLabs\SynapseToon\Rag\Summarizer;
 use VinkiusLabs\SynapseToon\Encoding\SynapseToonEncoder;
 
-final class DocumentSelector
+class DocumentSelector
 {
     public function __construct(
         private SynapseToonEncoder $encoder,
