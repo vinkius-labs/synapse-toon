@@ -6,7 +6,7 @@ This guide will walk you through installing and configuring Synapse TOON in your
 
 ## Prerequisites
 
-- Laravel 10.x, 11.x, or 12.x
+- Laravel 11.x or 12.x
 - PHP 8.2 or 8.3
 - Composer 2.x
 
@@ -52,17 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })->create();
 ```
 
-#### Laravel 10 (using app/Http/Kernel.php)
 
-```php
-protected $middlewareGroups = [
-    'api' => [
-        // ... existing middleware
-        \VinkiusLabs\SynapseToon\Http\Middleware\SynapseToonCompressionMiddleware::class,
-        \VinkiusLabs\SynapseToon\Http\Middleware\SynapseToonHttp3Middleware::class,
-    ],
-];
-```
 
 ### Step 4: Configure Environment Variables
 

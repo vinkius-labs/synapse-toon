@@ -10,7 +10,7 @@ Guidelines for contributing to Synapse TOON.
 
 ```bash
 PHP 8.2+
-Laravel 10+
+Laravel 11+
 Composer
 PostgreSQL 14+
 Redis 7+
