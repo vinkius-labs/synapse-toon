@@ -3,10 +3,16 @@
 namespace VinkiusLabs\SynapseToon\Test;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Illuminate\Testing\TestResponse;
 use VinkiusLabs\SynapseToon\SynapseToonServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
+    /**
+     * Required by Laravel 11/Testbench 9 HTTP testing internals.
+     */
+    protected static ?TestResponse $latestResponse = null;
+
     protected function getPackageProviders($app)
     {
         return [
