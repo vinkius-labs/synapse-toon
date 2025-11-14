@@ -11,7 +11,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Required by Laravel 11/Testbench 9 HTTP testing internals.
      */
-    protected static ?TestResponse $latestResponse = null;
+    public static ?TestResponse $latestResponse = null;
 
     protected function getPackageProviders($app)
     {
