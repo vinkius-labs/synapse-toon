@@ -1,6 +1,6 @@
 {
     "name": "vinkius-labs/synapse-toon",
-    "description": "Synapse TOON - high-performance API payload optimization and streaming toolkit for Laravel 11/12",
+    "description": "Synapse TOON - high-performance API payload optimization and streaming toolkit for Laravel 10/11/12",
     "keywords": ["laravel", "optimization", "apis", "streaming", "llm", "compression"],
     "license": "MIT",
     "authors": [
