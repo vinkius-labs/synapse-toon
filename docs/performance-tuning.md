@@ -383,4 +383,4 @@ class PerformanceTest extends TestCase
 
 - [Cost Optimization](cost-optimization.md) – Reduce API costs
 - [Edge Cache](edge-cache.md) – Add edge caching
-- [Architecture](architecture.md) – System design
+- [Technical Reference](technical-reference.md) – System design

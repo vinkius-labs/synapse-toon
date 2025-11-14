@@ -344,4 +344,4 @@ class Http3Test extends TestCase
 
 - [Performance Tuning](performance-tuning.md) – Measure impact
 - [Edge Cache](edge-cache.md) – Combine with caching
-- [Architecture](architecture.md) – System design
+- [Technical Reference](technical-reference.md) – System design

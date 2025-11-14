@@ -373,4 +373,4 @@ es.addEventListener('update', (e) => {
 
 - [Metrics & Analytics](metrics-analytics.md) – Track stream performance
 - [Performance Tuning](performance-tuning.md) – Optimize latency
-- [Architecture](architecture.md) – Understand design patterns
+- [Technical Reference](technical-reference.md) – Understand design patterns

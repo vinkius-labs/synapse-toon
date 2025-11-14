@@ -10,6 +10,7 @@ The package exposes a lightweight `SynapseToonVectorStore` contract that focuses
 
 ```php
 namespace VinkiusLabs\SynapseToon\Contracts;
+use Illuminate\Support\Collection;
 
 interface SynapseToonVectorStore
 {
@@ -34,8 +35,11 @@ interface SynapseToonVectorStoreManager
 namespace VinkiusLabs\SynapseToon\Rag;
 
 use Pinecone\Client as PineconeClient;
+use Illuminate\Support\Collection;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStore;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStoreManager;
 
-class PineconeVectorStore implements VectorStore
+class PineconeVectorStore implements SynapseToonVectorStore, SynapseToonVectorStoreManager
 {
     private PineconeClient $client;
     
@@ -47,7 +51,7 @@ class PineconeVectorStore implements VectorStore
         ]);
     }
     
-    public function search(string $query, int $limit = 3): array
+    public function search(string $query, int $limit = 3): Collection
     {
         // Embed query
         $embedding = $this->embedText($query);
@@ -59,15 +63,17 @@ class PineconeVectorStore implements VectorStore
             includeMetadata: true,
         );
         
-        return array_map(fn($match) => [
+        return Collection::make(array_map(fn($match) => [
             'id' => $match['id'],
             'score' => $match['score'],
             'metadata' => $match['metadata'],
-        ], $results['matches']);
+        ], $results['matches']));
     }
     
-    public function store(string $id, array $vector, array $metadata): void
+    public function store(string $id, string $content, array $metadata = []): void
     {
+        // Embed content before upsert
+        $vector = $this->embedText($content);
         $this->client->upsert([
             [
                 'id' => $id,
@@ -87,7 +93,11 @@ class PineconeVectorStore implements VectorStore
 ### Supabase Vector Implementation
 
 ```php
-class SupabaseVectorStore implements VectorStore
+use Illuminate\Support\Collection;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStore;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStoreManager;
+
+class SupabaseVectorStore implements SynapseToonVectorStore, SynapseToonVectorStoreManager
 {
     private SupabaseClient $client;
     private string $table = 'documents';
@@ -97,7 +107,7 @@ class SupabaseVectorStore implements VectorStore
         $this->client = $client;
     }
     
-    public function search(string $query, int $limit = 3): array
+    public function search(string $query, int $limit = 3): Collection
     {
         $embedding = $this->embedText($query);
         
@@ -106,11 +116,12 @@ class SupabaseVectorStore implements VectorStore
             'match_count' => $limit,
         ]);
         
-        return $results;
+        return Collection::make($results);
     }
     
-    public function store(string $id, array $vector, array $metadata): void
+    public function store(string $id, string $content, array $metadata = []): void
     {
+        $vector = $this->embedText($content);
         $this->client->table($this->table)->insert([
             'id' => $id,
             'embedding' => $vector,
@@ -184,20 +195,24 @@ class InMemoryVectorStore implements SynapseToonVectorStore
 ### Hybrid Search
 
 ```php
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStore;
+
 class RagService
 {
     public function __construct(
-        private readonly VectorStore $vectorStore,
+        private readonly SynapseToonVectorStore $vectorStore,
         private readonly DatabaseRepository $db,
     ) {}
     
     public function buildContext(string $query, array $metadata = []): string
     {
+        $searchLimit = (int) (config('synapse-toon.rag.context.search_limit', 10));
+        $finalLimit = (int) (config('synapse-toon.rag.context.limit', 3));
         // Vector search for semantic similarity (pre-select across 'search_limit' then score+token-budget selection)
-        $vectorResults = $this->vectorStore->search($query, $limit);
+        $vectorResults = $this->vectorStore->search($query, $searchLimit)->all();
         
         // Keyword search for exact matches
-        $keywordResults = $this->db->search($query, $limit);
+        $keywordResults = $this->db->search($query, $searchLimit);
         
         // Merge and rank
         $combined = $this->mergeResults($vectorResults, $keywordResults);
@@ -207,7 +222,7 @@ class RagService
         // document chunks by score and token budget before returning the final encoded context)
         return implode(PHP_EOL . PHP_EOL, array_map(
             fn($doc) => $doc['content'],
-            array_slice($combined, 0, $limit)
+            array_slice($combined, 0, $finalLimit)
         ));
     }
     
@@ -478,4 +493,4 @@ class RagServiceTest extends TestCase
 
 - [Batch Processing](batch-processing.md) – Queue RAG jobs
 - [Performance Tuning](performance-tuning.md) – Optimize search
-- [Architecture](architecture.md) – System design
+- [Technical Reference](technical-reference.md) – System design

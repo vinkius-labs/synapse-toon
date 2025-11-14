@@ -356,4 +356,4 @@ class UserProfileService
 
 - [Performance Tuning](performance-tuning.md) – Optimize strategies
 - [Cost Optimization](cost-optimization.md) – Reduce costs
-- [Architecture](architecture.md) – System design
+- [Technical Reference](technical-reference.md) – System design

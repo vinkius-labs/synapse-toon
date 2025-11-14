@@ -459,4 +459,4 @@ class GraphQLAdapterTest extends TestCase
 
 - [Edge Cache](edge-cache.md) – Cache GraphQL responses
 - [Performance Tuning](performance-tuning.md) – Optimize GraphQL latency
-- [Architecture](architecture.md) – Understand system design
+- [Technical Reference](technical-reference.md) – Understand system design

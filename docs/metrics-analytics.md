@@ -295,4 +295,4 @@ Cache::lock('synapse-metrics-push', 10)->get(function () {
 
 - [Performance Tuning](performance-tuning.md) – Optimize based on metrics
 - [Cost Optimization Guide](cost-optimization.md) – Maximize ROI
-- [Architecture](architecture.md) – Understand system design
+- [Technical Reference](technical-reference.md) – Understand system design
