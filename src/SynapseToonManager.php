@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;

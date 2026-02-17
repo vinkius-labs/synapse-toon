@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon\Jobs;
 
 use Illuminate\Bus\Batchable;

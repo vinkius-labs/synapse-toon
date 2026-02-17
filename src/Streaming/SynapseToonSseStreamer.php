@@ -9,9 +9,10 @@ use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonStreamerContract;
 use VinkiusLabs\SynapseToon\Encoding\SynapseToonEncoder;
 
-class SynapseToonSseStreamer
+class SynapseToonSseStreamer implements SynapseToonStreamerContract
 {
     private const DEFAULT_HEADERS = [
         'Content-Type' => 'text/event-stream',

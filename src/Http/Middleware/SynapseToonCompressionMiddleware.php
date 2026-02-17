@@ -37,6 +37,13 @@ class SynapseToonCompressionMiddleware
 
     private function processResponse(Request $request, SymfonyResponse $response): SymfonyResponse
     {
+        if ($this->isAlreadyEncoded($response)) {
+            $encoded = (string) $response->getContent();
+            $this->applyCompression($request, $response, $encoded);
+
+            return $response;
+        }
+
         $original = $this->extractPayload($response);
         $encoded = $this->encoder->encode($original);
 
@@ -45,6 +52,14 @@ class SynapseToonCompressionMiddleware
         $this->recordMetrics($request, $original, $encoded);
 
         return $response;
+    }
+
+    private function isAlreadyEncoded(SymfonyResponse $response): bool
+    {
+        $contentType = (string) $response->headers->get('Content-Type');
+        $toonContentType = (string) config('synapse-toon.defaults.content_type', 'application/x-synapse-toon');
+
+        return Str::contains($contentType, $toonContentType);
     }
 
     private function shouldBypass(SymfonyResponse $response): bool
@@ -67,10 +82,10 @@ class SynapseToonCompressionMiddleware
     {
         $compression = $this->compressor->compress($encoded, $request->header('Accept-Encoding'));
 
-        ($compression['encoding'] ?? null) !== null && (
-            $response->setContent($compression['body'])
-            && $response->headers->set('Content-Encoding', $compression['encoding'])
-        );
+        if (($compression['encoding'] ?? null) !== null) {
+            $response->setContent($compression['body']);
+            $response->headers->set('Content-Encoding', $compression['encoding']);
+        }
 
         $response->headers->set(
             (string) config('synapse-toon.compression.header', 'X-Synapse-TOON-Compressed'),

@@ -1,8 +1,15 @@
 {
     "name": "vinkius-labs/synapse-toon",
     "description": "Synapse TOON - high-performance API payload optimization and streaming toolkit for Laravel 11/12",
-    "keywords": ["laravel", "optimization", "apis", "streaming", "llm", "compression"],
-    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "optimization",
+        "apis",
+        "streaming",
+        "llm",
+        "compression"
+    ],
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Renato Marinho",
@@ -13,6 +20,10 @@
         "php": "^8.2 || ^8.3",
         "illuminate/support": "^11.0 || ^12.0",
         "guzzlehttp/guzzle": "^7.0"
+    },
+    "suggest": {
+        "ext-brotli": "Required for Brotli compression support (recommended for best performance)",
+        "ext-zlib": "Required for Gzip and Deflate compression support"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",

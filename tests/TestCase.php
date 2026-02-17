@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon\Test;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;

@@ -7,14 +7,13 @@ namespace VinkiusLabs\SynapseToon\Rag\Drivers;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStore;
-use VinkiusLabs\SynapseToon\Contracts\SynapseToonVectorStoreManager;
 
 /**
  * Simple in-memory vector store used for local development and tests.
  * This does not implement real vector similarity but provides a predictable
  * dataset for tests and demos.
  */
-class InMemoryVectorStore implements SynapseToonVectorStore, SynapseToonVectorStoreManager
+class InMemoryVectorStore implements SynapseToonVectorStore
 {
     /** @var array<string, array<string, mixed>> */
     protected array $index = [];

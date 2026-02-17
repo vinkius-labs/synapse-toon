@@ -32,6 +32,7 @@ class CompressionMiddlewareTest extends TestCase
     public function test_middleware_encodes_and_compresses_response(): void
     {
         $this->app['config']->set('synapse-toon.compression.enabled', true);
+        $this->app['config']->set('synapse-toon.compression.minimum_size', 0);
         $this->app['config']->set('synapse-toon.metrics.enabled', true);
         $this->app['config']->set('synapse-toon.metrics.driver', 'null');
 

@@ -18,6 +18,7 @@ return [
     'compression' => [
         'enabled' => true,
         'prefer' => 'brotli', // brotli, gzip, deflate, none
+        'minimum_size' => 128, // Minimum payload size in bytes to trigger compression
         'brotli' => [
             'quality' => 8,
             'mode' => 'generic',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon\Rag\Drivers;
 
 use Illuminate\Support\Collection;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VinkiusLabs\SynapseToon\Analytics\Drivers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use VinkiusLabs\SynapseToon\Contracts\SynapseToonMetricsDriver;
 
@@ -22,8 +23,15 @@ class SynapseToonPrometheusMetricsDriver implements SynapseToonMetricsDriver
 
         $line = $this->formatLine($payload);
 
-        Http::withBody($line, 'text/plain')
-            ->put(rtrim($this->pushGateway, '/') . '/metrics/job/' . $this->job);
+        rescue(
+            fn () => Http::withBody($line, 'text/plain')
+                ->put(rtrim($this->pushGateway, '/') . '/metrics/job/' . $this->job)
+                ->throw(),
+            fn (\Throwable $e) => Log::warning('[Synapse TOON] Prometheus push failed', [
+                'error' => $e->getMessage(),
+            ]),
+            false
+        );
     }
 
     protected function formatLine(array $payload): string

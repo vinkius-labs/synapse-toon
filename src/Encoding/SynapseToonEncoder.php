@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon\Encoding;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -9,8 +11,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use JsonSerializable;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonEncoderContract;
 
-class SynapseToonEncoder
+class SynapseToonEncoder implements SynapseToonEncoderContract
 {
     public function __construct(protected ConfigRepository $config)
     {

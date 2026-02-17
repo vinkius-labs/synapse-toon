@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon\Compression;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonCompressorContract;
 
-class SynapseToonCompressor
+class SynapseToonCompressor implements SynapseToonCompressorContract
 {
     public function __construct(protected ConfigRepository $config)
     {
@@ -22,6 +25,12 @@ class SynapseToonCompressor
     public function compress(string $payload, ?string $acceptEncoding = null, array $options = []): array
     {
         if (! $this->config->get('synapse-toon.compression.enabled', true)) {
+            return ['body' => $payload, 'encoding' => null, 'algorithm' => 'none'];
+        }
+
+        $minimumSize = (int) $this->config->get('synapse-toon.compression.minimum_size', 128);
+
+        if (strlen($payload) < $minimumSize) {
             return ['body' => $payload, 'encoding' => null, 'algorithm' => 'none'];
         }
 

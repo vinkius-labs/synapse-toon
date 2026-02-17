@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace VinkiusLabs\SynapseToon\Analytics\Drivers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use VinkiusLabs\SynapseToon\Contracts\SynapseToonMetricsDriver;
 
 class SynapseToonDatadogMetricsDriver implements SynapseToonMetricsDriver
@@ -30,10 +31,17 @@ class SynapseToonDatadogMetricsDriver implements SynapseToonMetricsDriver
             ]],
         ];
 
-        Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'DD-API-KEY' => $this->apiKey,
-        ])->post($this->endpoint, $series);
+        rescue(
+            fn () => Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'DD-API-KEY' => $this->apiKey,
+            ])->post($this->endpoint, $series)
+                ->throw(),
+            fn (\Throwable $e) => Log::warning('[Synapse TOON] Datadog push failed', [
+                'error' => $e->getMessage(),
+            ]),
+            false
+        );
     }
 
     protected function buildTags(array $payload): array

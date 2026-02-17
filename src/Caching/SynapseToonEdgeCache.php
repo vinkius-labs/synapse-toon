@@ -7,9 +7,10 @@ namespace VinkiusLabs\SynapseToon\Caching;
 use Closure;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonEdgeCacheContract;
 use VinkiusLabs\SynapseToon\Encoding\SynapseToonEncoder;
 
-class SynapseToonEdgeCache
+class SynapseToonEdgeCache implements SynapseToonEdgeCacheContract
 {
     public function __construct(protected SynapseToonEncoder $encoder)
     {

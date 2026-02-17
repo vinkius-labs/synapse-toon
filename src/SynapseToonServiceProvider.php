@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace VinkiusLabs\SynapseToon;
 
 use Illuminate\Contracts\Routing\ResponseFactory;
@@ -10,6 +12,10 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use VinkiusLabs\SynapseToon\Analytics\SynapseToonMetrics;
 use VinkiusLabs\SynapseToon\Caching\SynapseToonEdgeCache;
 use VinkiusLabs\SynapseToon\Compression\SynapseToonCompressor;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonCompressorContract;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonEdgeCacheContract;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonEncoderContract;
+use VinkiusLabs\SynapseToon\Contracts\SynapseToonStreamerContract;
 use VinkiusLabs\SynapseToon\Encoding\SynapseToonDecoder;
 use VinkiusLabs\SynapseToon\Encoding\SynapseToonEncoder;
 use VinkiusLabs\SynapseToon\GraphQL\SynapseToonGraphQLAdapter;
@@ -113,14 +119,24 @@ class SynapseToonServiceProvider extends BaseServiceProvider
     private function registerCoreBindings(): void
     {
         $this->app->singleton(SynapseToonEncoder::class, fn ($app) => new SynapseToonEncoder($app['config']));
+        $this->app->alias(SynapseToonEncoder::class, SynapseToonEncoderContract::class);
+
         $this->app->singleton(SynapseToonDecoder::class, fn ($app) => new SynapseToonDecoder($app->make(SynapseToonEncoder::class)));
+
         $this->app->singleton(SynapseToonCompressor::class, fn ($app) => new SynapseToonCompressor($app['config']));
+        $this->app->alias(SynapseToonCompressor::class, SynapseToonCompressorContract::class);
+
         $this->app->singleton(SynapseToonMetrics::class, fn ($app) => new SynapseToonMetrics($app['config'], $app));
         $this->app->singleton(SynapseToonPayloadAnalyzer::class, fn ($app) => new SynapseToonPayloadAnalyzer($app->make(SynapseToonEncoder::class)));
         $this->app->singleton(SynapseToonRagService::class, fn ($app) => new SynapseToonRagService($app['config'], $app, $app->make(SynapseToonEncoder::class)));
         $this->app->singleton(SynapseToonLLMRouter::class, fn ($app) => new SynapseToonLLMRouter($app['config'], $app, $app->make(SynapseToonEncoder::class)));
+
         $this->app->singleton(SynapseToonEdgeCache::class, fn ($app) => new SynapseToonEdgeCache($app->make(SynapseToonEncoder::class)));
+        $this->app->alias(SynapseToonEdgeCache::class, SynapseToonEdgeCacheContract::class);
+
         $this->app->singleton(SynapseToonSseStreamer::class, fn ($app) => new SynapseToonSseStreamer($app->make(ResponseFactory::class), $app->make(SynapseToonEncoder::class)));
+        $this->app->alias(SynapseToonSseStreamer::class, SynapseToonStreamerContract::class);
+
         $this->app->singleton(SynapseToonGraphQLAdapter::class, fn ($app) => new SynapseToonGraphQLAdapter($app->make(SynapseToonEncoder::class)));
     }
 }

@@ -13,6 +13,7 @@ class SynapseToonCompressorTest extends TestCase
 
         $this->app['config']->set('synapse-toon.compression.enabled', true);
         $this->app['config']->set('synapse-toon.compression.prefer', 'gzip');
+        $this->app['config']->set('synapse-toon.compression.minimum_size', 0);
     }
 
     public function test_gzip_compression_is_selected_when_available(): void
